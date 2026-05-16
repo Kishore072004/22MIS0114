@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from middleware import custom_logging_middleware
+from .middleware import custom_logging_middleware
 import time
 
 app = FastAPI(title="Logging Middleware Example")

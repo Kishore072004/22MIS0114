@@ -1,12 +1,14 @@
-from fastapi import FastAPI, Depends, BackgroundTasks, Query, Request
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+from fastapi import FastAPI, Depends, BackgroundTasks, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import List
 import time
-import logging
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from logging_middleware.middleware import custom_logging_middleware
 
 import models
 import schemas
@@ -16,13 +18,10 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Campus Notification System")
 
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    logger.info(f"{request.method} {request.url.path} - {response.status_code} - {process_time:.4f}s")
-    return response
+# To run this app, use: uvicorn main:app --reload --port 8001
+
+# Register the shared logging middleware from logging_middleware/middleware.py
+app.middleware("http")(custom_logging_middleware)
 
 def process_email_or_sms(student_id: str, message: str):
     time.sleep(2)
